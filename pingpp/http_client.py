@@ -1,7 +1,7 @@
-import os
 import sys
 import textwrap
 import warnings
+import certifi
 
 from pingpp import error, util
 
@@ -87,8 +87,7 @@ class RequestsClient(HTTPClient):
         kwargs = {}
 
         if self._verify_ssl_certs:
-            kwargs['verify'] = os.path.join(
-                os.path.dirname(__file__), 'data/ca-certificates.crt')
+            kwargs['verify'] = certifi.where()
         else:
             kwargs['verify'] = False
 
@@ -208,8 +207,7 @@ class PycurlClient(HTTPClient):
         curl.setopt(pycurl.HTTPHEADER, ['%s: %s' % (k, v)
                     for k, v in headers.iteritems()])
         if self._verify_ssl_certs:
-            curl.setopt(pycurl.CAINFO, os.path.join(
-                os.path.dirname(__file__), 'data/ca-certificates.crt'))
+            curl.setopt(pycurl.CAINFO, certifi.where())
         else:
             curl.setopt(pycurl.SSL_VERIFYHOST, False)
 

@@ -15,7 +15,7 @@ except ImportError:
 path, script = os.path.split(sys.argv[0])
 os.chdir(os.path.abspath(path))
 
-install_requires = []
+install_requires = ['certifi']
 
 if sys.version_info < (2, 6):
     warnings.warn(
@@ -48,7 +48,7 @@ setup(
     author_email='support@pingplusplus.com',
     url='https://pingplusplus.com/',
     packages=['pingpp'],
-    package_data={'pingpp': ['data/ca-certificates.crt', '../VERSION']},
+    package_data={'pingpp': ['../VERSION']},
     install_requires=install_requires,
     use_2to3=True,
     classifiers=[
