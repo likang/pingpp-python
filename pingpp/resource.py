@@ -1,5 +1,4 @@
 import urllib
-import warnings
 import sys
 
 from pingpp import api_requestor, error, util
@@ -146,30 +145,9 @@ class PingppObject(dict):
     def __str__(self):
         return util.json.dumps(self, sort_keys=False, indent=2)
 
-    def to_dict(self):
-        warnings.warn(
-            'The `to_dict` method is deprecated and will be removed in '
-            'version 2.0 of the Ping++ bindings. The PingppObject is '
-            'itself now a subclass of `dict`.',
-            DeprecationWarning)
-
-        return dict(self)
-
     @property
     def pingpp_id(self):
         return self.id
-
-
-class PingppObjectEncoder(util.json.JSONEncoder):
-
-    def __init__(self, *args, **kwargs):
-        warnings.warn(
-            '`PingppObjectEncoder` is deprecated and will be removed in '
-            'version 2.0 of the Ping++ bindings.  PingppObject is now a '
-            'subclass of `dict` and is handled natively by the built-in '
-            'json library.',
-            DeprecationWarning)
-        super(PingppObjectEncoder, self).__init__(*args, **kwargs)
 
 
 class APIResource(PingppObject):

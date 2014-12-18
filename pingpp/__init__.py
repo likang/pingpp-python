@@ -13,7 +13,7 @@ from pingpp.error import (
 from pingpp.version import VERSION
 from pingpp.api_requestor import APIRequestor
 from pingpp.resource import (
-    convert_to_pingpp_object, PingppObject, PingppObjectEncoder,
+    convert_to_pingpp_object, PingppObject,
     APIResource, ListObject, SingletonAPIResource, ListableAPIResource,
     CreateableAPIResource, UpdateableAPIResource, DeletableAPIResource)
 
