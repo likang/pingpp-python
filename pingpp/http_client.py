@@ -21,29 +21,9 @@ except ImportError:
     pycurl = None
 
 try:
-    import requests
+    import urllib3
 except ImportError:
-    requests = None
-else:
-    try:
-        # Require version 0.8.8, but don't want to depend on distutils
-        version = requests.__version__
-        major, minor, patch = [int(i) for i in version.split('.')]
-    except Exception:
-        # Probably some new-fangled version, so it should support verify
-        pass
-    else:
-        if (major, minor, patch) < (0, 8, 8):
-            sys.stderr.write(
-                'Warning: the Ping++ library requires that your Python '
-                '"requests" library be newer than version 0.8.8, but your '
-                '"requests" library is version %s. Ping++ will fall back to '
-                'an alternate HTTP library so everything should work. We '
-                'recommend upgrading your "requests" library. If you have any '
-                'questions, please contact support@pingplusplus.com. (HINT: running '
-                '"pip install -U requests" should upgrade your requests '
-                'library to the latest version.)' % (version,))
-            requests = None
+    urllib3 = None
 
 try:
     from google.appengine.api import urlfetch
@@ -54,18 +34,18 @@ except ImportError:
 def new_default_http_client(*args, **kwargs):
     if urlfetch:
         impl = UrlFetchClient
-    elif requests:
-        impl = RequestsClient
+    elif urllib3:
+        impl = Urllib3Client
     elif pycurl:
         impl = PycurlClient
     else:
         impl = Urllib2Client
         warnings.warn(
             "Warning: the Ping++ library is falling back to urllib2/urllib "
-            "because neither requests nor pycurl are installed. "
+            "because neither urllib3 nor pycurl are installed. "
             "urllib2's SSL implementation doesn't verify server "
             "certificates. For improved security, we suggest installing "
-            "requests.")
+            "urllib3.")
 
     return impl(*args, **kwargs)
 
@@ -80,62 +60,32 @@ class HTTPClient(object):
             'HTTPClient subclasses must implement `request`')
 
 
-class RequestsClient(HTTPClient):
-    name = 'requests'
+class Urllib3Client(HTTPClient):
+    name = 'urllib3'
 
     def request(self, method, url, headers, post_data=None):
-        kwargs = {}
+        if sys.version_info >= (3, 0) and isinstance(post_data, basestring):
+            post_data = post_data.encode('utf-8')
 
         if self._verify_ssl_certs:
-            kwargs['verify'] = certifi.where()
+            http = urllib3.PoolManager(cert_reqs='CERT_REQUIRED',
+                                       ca_certs=certifi.where(), timeout=80)
         else:
-            kwargs['verify'] = False
+            http = urllib3.PoolManager(timeout=80)
 
         try:
-            try:
-                result = requests.request(method,
-                                          url,
-                                          headers=headers,
-                                          data=post_data,
-                                          timeout=80,
-                                          **kwargs)
-            except TypeError, e:
-                raise TypeError(
-                    'Warning: It looks like your installed version of the '
-                    '"requests" library is not compatible with Ping++\'s '
-                    'usage thereof. (HINT: The most likely cause is that '
-                    'your "requests" library is out of date. You can fix '
-                    'that by running "pip install -U requests".) The '
-                    'underlying error was: %s' % (e,))
-
-            # This causes the content to actually be read, which could cause
-            # e.g. a socket timeout. TODO: The other fetch methods probably
-            # are susceptible to the same and should be updated.
-            content = result.content
-            status_code = result.status_code
+            result = http.request(method, url, headers=headers, body=post_data)
         except Exception, e:
-            # Would catch just requests.exceptions.RequestException, but can
-            # also raise ValueError, RuntimeError, etc.
             self._handle_request_error(e)
-        return content, status_code
+
+        return result.data, result.status
 
     def _handle_request_error(self, e):
-        if isinstance(e, requests.exceptions.RequestException):
-            msg = ("Unexpected error communicating with Ping++.  "
-                   "If this problem persists, let us know at "
-                   "support@pingplusplus.com.")
-            err = "%s: %s" % (type(e).__name__, str(e))
-        else:
-            msg = ("Unexpected error communicating with Ping++. "
-                   "It looks like there's probably a configuration "
-                   "issue locally.  If this problem persists, let us "
-                   "know at support@pingplusplus.com.")
-            err = "A %s was raised" % (type(e).__name__,)
-            if str(e):
-                err += " with error message %s" % (str(e),)
-            else:
-                err += " with no error message"
-        msg = textwrap.fill(msg) + "\n\n(Network error: %s)" % (err,)
+
+        msg = ("Unexpected error communicating with Ping++. "
+               "If this problem persists, let us know at "
+               "support@pingplusplus.com.")
+        msg = textwrap.fill(msg) + "\n\n(Network error: " + str(e) + ")"
         raise error.APIConnectionError(msg)
 
 
