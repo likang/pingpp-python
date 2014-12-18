@@ -1,4 +1,28 @@
 
+# 参赛说明
+
+基于官方给出的 SDK，主要做出了以下改动：
+
+1. 删除证书黑名单
+2. 使用 certifi 模块代替自带的 CA 列表
+3. 使用 urllib3 代替 requests
+4. 移除废弃的代码
+5. 根据 pep8 标准格式化代码
+
+## 具体说明
+### 1.删除证书黑名单
+Pingplusplus 目前没有吊销的证书，固无需使用黑名单。另外，
+SLL证书的吊销检查被谷歌浏览器的团队视为意义不大，已放弃支持，
+[查看详情]([https://www.imperialviolet.org/2012/02/05/crlsets.html)。
+
+### 2. 使用 certifi 模块代替自带的 CA 列表
+这是目前 Python 模块的通用做法，不自己维护这个列表，而是使用公开维护的模块。
+
+### 3. 使用 urllib3 代替 requests
+Pingplusplus 的 SDK 使用 requests 模块时，仅仅用到了其支持 SSL 的特性，
+而 requests 这一特性来自于其内置的 urllib3 模块，因此使用独立的 urllib3 
+模块显得更加合理、精简。
+
 # PingPP-Python SDK 
 ----------
 
