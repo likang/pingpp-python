@@ -4,7 +4,6 @@ import platform
 import time
 import urllib
 import urlparse
-import warnings
 
 import pingpp
 from pingpp import error, http_client, version, util
@@ -103,8 +102,8 @@ class APIRequestor(object):
                 'No API key provided. (HINT: set your API key using '
                 '"pingpp.api_key = <API-KEY>"). You can generate API keys '
                 'from the Ping++ web interface.  See https://pingplusplus.com '
-                'for details, or email support@pingplusplus.com if you have any '
-                'questions.')
+                'for details, or email support@pingplusplus.com if you have '
+                'any questions.')
 
         abs_url = '%s%s' % (pingpp.api_base, url)
 
@@ -139,7 +138,8 @@ class APIRequestor(object):
 
         headers = {
             'X-Pingpp-Client-User-Agent': util.json.dumps(ua),
-            'User-Agent': 'Pingplusplus/v1 PythonBindings/%s' % (version.VERSION,),
+            'User-Agent': 'Pingplusplus/v1 '
+                          'PythonBindings/%s' % (version.VERSION,),
             'Authorization': 'Bearer %s' % (my_api_key,)
         }
 

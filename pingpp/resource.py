@@ -20,6 +20,7 @@ def convert_to_pingpp_object(resp, api_key):
     else:
         return resp
 
+
 class PingppObject(dict):
     def __init__(self, id=None, api_key=None, **params):
         super(PingppObject, self).__init__()
@@ -290,6 +291,7 @@ class DeletableAPIResource(APIResource):
         self.refresh_from(self.request('delete', self.instance_url(), params))
         return self
 
+
 class Charge(CreateableAPIResource, ListableAPIResource,
              UpdateableAPIResource):
 
@@ -297,6 +299,7 @@ class Charge(CreateableAPIResource, ListableAPIResource,
         url = self.instance_url() + '/refunds'
         self.refresh_from(self.request('post', url, params))
         return self
+
 
 class Refund(UpdateableAPIResource):
 

@@ -220,6 +220,7 @@ class Urllib2Client(HTTPClient):
 
     def _handle_request_error(self, e):
         msg = ("Unexpected error communicating with Ping++. "
-               "If this problem persists, let us know at support@pingplusplus.com.")
+               "If this problem persists, let us know at "
+               "support@pingplusplus.com.")
         msg = textwrap.fill(msg) + "\n\n(Network error: " + str(e) + ")"
         raise error.APIConnectionError(msg)
